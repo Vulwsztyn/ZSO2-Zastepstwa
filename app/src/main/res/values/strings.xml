@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">Zastępstwa</string>
+    <string name="refresh_button_text">Odśwież</string>
+    <string name="job_enable_button_text">Włącz</string>
+    <string name="job_disable_button_text">Wyłącz</string>
+    <string name="Nieobecni">Nauczyciele Nieobecni:</string>
+    <string name="JeszczeNie">Jeszcze nie pobrano</string>
+    <string name="zast">zast.</string>
+    <string name="swietl">świetl.</string>
+</resources>
