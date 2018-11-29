@@ -20,12 +20,24 @@
             android:orientation="vertical">
 
             <TextView
+                android:id="@+id/dataNieobecnosci"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingLeft="16dp"
+                android:paddingRight="16dp"
+                android:paddingStart="16dp"
+                android:paddingTop="16dp"
+                android:text="Data - zaraz ogarne"
+                tools:layout_editor_absoluteX="133dp"
+                tools:layout_editor_absoluteY="177dp" />
+
+            <TextView
                 android:id="@+id/nieobecni"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="16dp"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="16dp"
+                android:paddingRight="16dp"
+                android:paddingStart="16dp"
+                android:paddingTop="16dp"
                 android:text="@string/Nieobecni"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
@@ -34,11 +46,9 @@
                 android:id="@+id/listaNieobecnych"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="16dp"
-                android:layout_marginLeft="16dp"
-                android:layout_marginRight="16dp"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="16dp"
+                android:paddingRight="16dp"
+                android:paddingStart="16dp"
+                android:paddingTop="16dp"
                 android:text="@string/JeszczeNie"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.0"
@@ -64,6 +74,14 @@
                 app:layout_constraintVertical_bias="0.0">
 
             </TableLayout>
+
+            <TextView
+                android:id="@+id/dodatkoweText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Kra"
+                tools:layout_editor_absoluteX="114dp"
+                tools:layout_editor_absoluteY="213dp" />
         </LinearLayout>
     </ScrollView>
 

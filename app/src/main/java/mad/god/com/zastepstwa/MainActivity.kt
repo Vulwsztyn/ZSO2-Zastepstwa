@@ -1,35 +1,29 @@
 package mad.god.com.zastepstwa
 
+import android.app.Activity
 import android.content.Intent
 import android.graphics.Color
-import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
-import android.support.v4.app.NotificationCompat
 import android.view.Gravity
 import android.widget.*
 import kotlinx.android.synthetic.main.activity_main.*
 import org.jsoup.Jsoup;
 import org.jsoup.select.Selector
 
-import com.evernote.android.job.JobManager
-import mad.god.com.zastepstwa.Sprawdzacz.DemoJobCreator
 import java.net.SocketTimeoutException
 import android.app.NotificationManager
 import android.app.NotificationChannel
 import android.os.Build
-import android.support.v4.app.NotificationManagerCompat
-import android.app.PendingIntent
-import mad.god.com.zastepstwa.Sprawdzacz.DemoSyncJob
 import android.widget.Toast
 import android.content.ContentValues
-import android.content.Context
 import mad.god.com.zastepstwa.SQLite.MainSQLiteHelper
 import kotlin.concurrent.thread
-import java.text.SimpleDateFormat
-import java.util.*
+import android.app.job.JobParameters
 
 
-class MainActivity : AppCompatActivity() {
+
+
+class MainActivity : Activity() {
     private val jobTag = "sprawdzacz"
     val url="http://zso2.pl/nowa/index.php/zastepstwa"
     private val lock = java.lang.Object()
@@ -37,14 +31,24 @@ class MainActivity : AppCompatActivity() {
     var CHANNEL_NAME=6
     var CHANNEL_DESC=8
 
-    var debugNumber=13
+//    private val mJobHandler = Handler(object : Handler.Callback() {
+//
+//        fun handleMessage(msg: Message): Boolean {
+//            Toast.makeText(applicationContext,
+//                    "JobService task running", Toast.LENGTH_SHORT)
+//                    .show()
+//            jobFinished(msg.obj as JobParameters, false)
+//            return true
+//        }
+//    })
 
-    @Synchronized private fun DB_addDate(i: Int,tekst: String,zmiany:String) {
+    @Synchronized private fun DB_addDate(i: Int,tekst: String,zmiany:String,dodatkowe:String) {
         val database = MainSQLiteHelper(this).writableDatabase
         val values = ContentValues()
         values.put(MainSQLiteHelper.COLUMN_ID, i)
         values.put(MainSQLiteHelper.COLUMN_VALUE, tekst)
         values.put(MainSQLiteHelper.DATES_COLUMN_ZMIANY, zmiany)
+        values.put(MainSQLiteHelper.DATES_COLUMN_DODATKOWE, dodatkowe)
         val newRowId = database.insert(MainSQLiteHelper.DATES_TABLE_NAME, null, values)
         database.close()
     }
@@ -86,8 +90,11 @@ class MainActivity : AppCompatActivity() {
         // don't group the rows
 
          cursor.moveToFirst()
+
         while (!cursor.isAfterLast) {
-            println(cursor.getInt(0).toString()+" "+cursor.getString(1)+" "+cursor.getString(2))
+
+
+            //println(cursor.getInt(0).toString()+" "+cursor.getString(1)+" "+cursor.getString(2))
 
             val row = TableRow(datesTable.context)
             val lp = TableRow.LayoutParams(TableRow.LayoutParams.MATCH_PARENT)
@@ -99,14 +106,14 @@ class MainActivity : AppCompatActivity() {
 
             val qty = TextView(row.context)
             qty.text = cursor.getString(1)
-            qty.setTextColor(Color.BLACK)
+            qty.setTextColor(Color.WHITE)
 
             val index=cursor.getInt(0)
 
             runOnUiThread {
 
                 row.setOnClickListener {
-                    val intent = Intent(this@MainActivity, Show_Zastepstwa::class.java).apply {
+                    val intent = Intent(this@MainActivity, ShowZastepstwa::class.java).apply {
                         putExtra("index", index)
                     }
                     startActivity(intent)
@@ -120,6 +127,7 @@ class MainActivity : AppCompatActivity() {
         cursor.close()
         database.close()
     }
+
     fun checkIfNew():Boolean {
 
         val database = MainSQLiteHelper(this).readableDatabase
@@ -166,9 +174,6 @@ class MainActivity : AppCompatActivity() {
                 }
                 else{
                     Jsoup.connect(url).get().run {
-                        var currentDateIndex = 0
-                        var currentTeacherIndex = -1
-                        var currentSubIndex = 0
                         var sprawdzone=false
                         select("a[href]").forEachIndexed { index, element ->
                             if(!sprawdzone){
@@ -194,10 +199,10 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-    fun downloadData(){
-        Toast.makeText(this, "Sprawdzam", Toast.LENGTH_SHORT).show()
-            if(!checkIfNew()) {
-                Toast.makeText(this, "Nic nowego", Toast.LENGTH_SHORT).show()
+    fun downloadData(czyWypisywac: Boolean){
+        if(czyWypisywac)Toast.makeText(this, "Sprawdzam", Toast.LENGTH_SHORT).show()
+            if(!checkIfNew()&&false) {
+                if(czyWypisywac) Toast.makeText(this, "Nic nowego", Toast.LENGTH_SHORT).show()
                 return
             }
             val database = MainSQLiteHelper(this).writableDatabase
@@ -215,18 +220,11 @@ class MainActivity : AppCompatActivity() {
                         var currentSubIndex = 0
 
                         select("a[href]").forEachIndexed { index, element ->
-                            if (element.text().matches("^Zmiany.+".toRegex())) {
-                                Jsoup.connect(element.attr("abs:href")).get().run {
-                                    var listaUstawiona = false
-                                    for (it in select("p")) {
-                                        if (!listaUstawiona) {
-                                            if (it.text().matches("^[A-Z][a-z]+ [A-Z]\\..+".toRegex())) {
-                                                DB_addDate(currentDateIndex, element.text(), it.text())
-                                                listaUstawiona = true
-                                            }
-                                        }
-                                    }
 
+                            if (element.text().matches("^Zmiany.+".toRegex())) {
+                                println(element.text())
+                                Jsoup.connect(element.attr("abs:href")).get().run {
+                                    var listaNieobecnych=""
                                     select("table").get(0).run {
                                         var columnNumber = 0
                                         val values = ContentValues()
@@ -237,6 +235,7 @@ class MainActivity : AppCompatActivity() {
                                                 if (numberOfCells == 1) {
                                                     currentTeacherIndex++
                                                     DB_addTeacher(currentTeacherIndex, cell.text(), currentDateIndex)
+                                                    listaNieobecnych+=cell.text()+" "
                                                 } else {
                                                     when (columnNumber) {
                                                         0 -> {
@@ -260,6 +259,13 @@ class MainActivity : AppCompatActivity() {
                                             }
                                         }
                                     }
+                                    var dodatkowe=""
+                                    dodatkowe+='\n'
+                                    select("article>div~p").forEachIndexed { index, element ->
+                                        dodatkowe+=element.text()+'\n'+'\n'
+                                    }
+
+                                    DB_addDate(currentDateIndex, element.text(), listaNieobecnych,dodatkowe)
                                 }
                                 currentDateIndex++
                             }
@@ -296,20 +302,21 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-            downloadData()
-            displayData()
-        button.setOnClickListener{
-            downloadData()
-            displayData()
+//        button.isClickable=!true
+        downloadData(false)
+        displayData()
+//        button.isClickable=true
+//        button.setOnClickListener{
+//            button.isClickable=!true
+//            downloadData(true)
+//            displayData()
+//            button.isClickable=true
+//        }
 
-        }
+        //createNotificationChannel()
+        //JobManager.create(this).addJobCreator(DemoJobCreator())
 
-
-
-        createNotificationChannel()
-        JobManager.create(this).addJobCreator(DemoJobCreator())
-
-        DemoSyncJob.scheduleJob()
+        //DemoSyncJob.scheduleJob()
 
 
 

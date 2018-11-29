@@ -5,14 +5,15 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 
 android {
-    compileSdkVersion 26
+    compileSdkVersion 27
     defaultConfig {
         applicationId "mad.god.com.zastepstwa"
-        minSdkVersion 14
-        targetSdkVersion 26
-        versionCode 1
-        versionName "1.0"
+        minSdkVersion 21
+        targetSdkVersion 27
+        versionCode 2
+        versionName "2.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        vectorDrawables.useSupportLibrary = true
     }
     buildTypes {
         release {
@@ -25,7 +26,7 @@ android {
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"
-    implementation 'com.android.support:appcompat-v7:26.1.0'
+    implementation 'com.android.support:appcompat-v7:27.1.1'
     implementation 'com.android.support.constraint:constraint-layout:1.1.0'
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.1'
@@ -37,16 +38,16 @@ dependencies {
     implementation 'org.jsoup:jsoup:1.11.3'
     testImplementation group: 'junit', name: 'junit', version: '4.12'
 }
-//Evernote job discośtam
-dependencies {
-    implementation 'com.evernote:android-job:1.2.5'
-}
-//Notifications
-//dependencies {
-//    implementation "com.android.support:support-compat:27.1.1"
-//}
-//Nie wiem
+
 dependencies {
     implementation 'com.android.support.constraint:constraint-layout:+'
 }
 
+dependencies {
+    implementation 'com.android.support:support-v4:27.1.1'
+    implementation 'com.android.support:support-vector-drawable:27.1.1'
+}
+
+dependencies {
+    implementation 'com.android.support.constraint:constraint-layout:+'
+}
